@@ -13,14 +13,27 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "@vue/composition-api";
-import { configureUserStore } from "./userStore.ts";
+<script lang="ts">
+import { defineComponent, SetupContext, watch } from "@vue/composition-api";
+import { configureUserStore } from "./userStore";
 
 export default defineComponent({
   name: "App",
-  setup() {
+  setup(_, context: SetupContext) {
     const userStore = configureUserStore();
+
+    watch(
+      () => userStore.user,
+      () => {
+        if (userStore.user) {
+          context.root.$ga.set("userId", userStore.user.id);
+          context.root.$ga.set("dimension1", userStore.user.id);
+          context.root.$ga.set("dimension2", userStore.user.department);
+        } else {
+          // clear
+        }
+      }
+    );
 
     return {
       userStore
